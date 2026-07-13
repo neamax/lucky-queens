@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import logo from './assets/logo.png';
-import { Settings, HelpCircle, Sun, Moon, Lightbulb, RotateCcw, Crown, Play } from 'lucide-react';
+import { Settings, HelpCircle, Sun, Moon, Lightbulb, RotateCcw, Crown, Play, Mail, GitBranch, Send, MessageCircle } from 'lucide-react';
 import { useGameLogic } from './hooks/useGameLogic';
 import { BOARD_SIZES, DIFFICULTIES } from './levels';
 import type { BoardSize, Difficulty } from './types';
@@ -105,7 +105,7 @@ export default function App() {
 
         {/* right-side navigation drawer triggers */}
         <div className="flex items-center gap-2">
-          {/* MARK: help drawer */}
+          {/* MARK: Help Drawer */}
           <Drawer swipeDirection="right">
             <DrawerTrigger render={<Button variant="outline" size="sm" className="gap-1.5 rounded-xl cursor-pointer" />}>
               <HelpCircle className="h-4 w-4" />
@@ -193,7 +193,7 @@ export default function App() {
             </DrawerContent>
           </Drawer>
 
-          {/* MARK: configurations */}
+          {/* MARK: Configurations */}
           <Drawer swipeDirection="right" open={configOpen} onOpenChange={setConfigOpen}>
             <DrawerTrigger render={<Button variant="outline" size="sm" className="gap-1.5 rounded-xl cursor-pointer" />}>
               <Settings className="h-4 w-4" />
@@ -288,6 +288,33 @@ export default function App() {
                     onCheckedChange={setIsAutoCrossEnabled}
                     className="cursor-pointer"
                   />
+                </div>
+              </div>
+              {/* MARK: About Section */}
+              <div className="pt-2 pb-3 rounded-xl bg-secondary border border-secondary shrink-0 space-y-2">
+                <div className="text-center text-xs text-slate-500 dark:text-slate-400 space-y-0.5">
+                  <p>
+                    Developed by{' '}
+                    <a href="https://www.luckygene.net/neama" target="_blank" rel="noopener noreferrer" className="text-teal-600 dark:text-teal-400 hover:underline font-medium">Neama Kazemi</a>
+                  </p>
+                  <p>
+                    at{' '}
+                    <a href="https://www.luckygene.net" target="_blank" rel="noopener noreferrer" className="text-teal-600 dark:text-teal-400 hover:underline font-medium">LuckyGene Indie Studio</a>
+                  </p>
+                </div>
+                <div className="flex justify-center gap-2">
+                  <a href="mailto:neama@luckygene.net" aria-label="Email">
+                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg cursor-pointer"><Mail className="h-4 w-4" /></Button>
+                  </a>
+                  <a href="https://github.com/neamax" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg cursor-pointer"><GitBranch className="h-4 w-4" /></Button>
+                  </a>
+                  <a href="https://t.me/neamax" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg cursor-pointer"><Send className="h-4 w-4" /></Button>
+                  </a>
+                  <a href="https://wa.me/17866271131" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg cursor-pointer"><MessageCircle className="h-4 w-4" /></Button>
+                  </a>
                 </div>
               </div>
               <div className="pt-2 shrink-0">
