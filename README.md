@@ -3,7 +3,6 @@
 
 A browser-based logic puzzle where you place exactly one queen in every row, column, and colour region — with no two queens touching, not even diagonally. Built with React 19, TypeScript, and Tailwind CSS v4.
 
----
 
 ## Gameplay
 
@@ -11,7 +10,6 @@ Place one queen per row, per column, and per colour region. No two queens may oc
 
 **Cell interaction cycle:** empty → ✕ (cross) → ♛ (queen) → empty
 
----
 
 ## Features
 
@@ -25,7 +23,6 @@ Place one queen per row, per column, and per colour region. No two queens may oc
 - **Dark / light theme** — toggleable from the settings panel
 - **Victory screen** — shows final time and move count on puzzle completion
 
----
 
 ## Tech Stack
 
@@ -38,7 +35,6 @@ Place one queen per row, per column, and per colour region. No two queens may oc
 | Icons | Lucide React |
 | Build tool | Vite 8 |
 
----
 
 ## Getting Started
 
@@ -59,7 +55,6 @@ npm run build
 npm run preview
 ```
 
----
 
 ## Project Structure
 
@@ -79,7 +74,6 @@ src/
 └── types.ts         # shared TypeScript types
 ```
 
----
 
 ## How the Generator Works
 
@@ -87,13 +81,14 @@ src/
 2. **Region flood-fill** — each queen seeds a region that expands outward; the expansion strategy varies by difficulty (stack for Easy, queue for Hard, random for Medium)
 3. **Single-cell region tuning** — a post-processing pass enforces per-difficulty limits on single-cell regions to control puzzle feel
 
----
 
 ## License
 
 Open-source — see repository for licence details.
 
-#### Developed by
-### Neama Kazemi
-### at LuckyGene Indie Studio
-Email: [neama@luckygene.net](mailto:neama@luckygene.net)
+```
+Developed by
+Neama Kazemi
+at LuckyGene Indie Studio
+```
+#### Email: [neama@luckygene.net](mailto:neama@luckygene.net)
