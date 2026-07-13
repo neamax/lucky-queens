@@ -42,17 +42,20 @@ Place one queen per row, per column, and per colour region. No two queens may oc
 
 ## Getting Started
 
+### install dependencies
 ```bash
-# install dependencies
 npm install
-
-# start dev server
+```
+### start dev server
+```bash
 npm run dev
-
-# production build
+```
+### production build
+```bash
 npm run build
-
-# preview production build
+```
+### preview production build
+```bash
 npm run preview
 ```
 
@@ -89,3 +92,8 @@ src/
 ## License
 
 Open-source — see repository for licence details.
+
+#### Developed by
+### Neama Kazemi
+### at LuckyGene Indie Studio
+Email: [neama@luckygene.net](mailto:neama@luckygene.net)
