@@ -13,7 +13,6 @@ interface CellProps {
         left: boolean;
         right: boolean;
     };
-    onClick: (row: number, col: number) => void;
 }
 
 const regionColours: Record<number, string> = {
@@ -41,11 +40,10 @@ const cellSizeClass: Record<BoardSize, string> = {
     15: 'h-6 w-6 sm:h-8 sm:w-8 text-base',
 };
 
-export function Cell({ data, isConflict, isHinted, boardSize, borders, onClick }: CellProps) {
+export function Cell({ data, isConflict, isHinted, boardSize, borders }: CellProps) {
     return (
         <div
             data-cell={`${data.row}-${data.col}`}
-            onClick={() => onClick(data.row, data.col)}
             className={cn(
                 'bg-conic-45 hover:bg-conic-225 inset-shadow-sm hover:inset-shadow-gray-500 cell-tile flex cursor-pointer select-none rounded rounded-xs items-center justify-center transition-all duration-150 font-medium relative',
                 cellSizeClass[boardSize],

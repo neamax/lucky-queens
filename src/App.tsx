@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import logo from './assets/logo.png';
-import { Settings, HelpCircle, Sun, Moon, Lightbulb, RotateCcw, Crown, Play, Mail, GitBranch, Send, MessageCircle } from 'lucide-react';
+import { Settings, HelpCircle, Sun, Moon, Lightbulb, RotateCcw, Crown, Play, Mail, GitBranch, Send, MessageCircle, PlusSquare, Eraser } from 'lucide-react';
 import { useGameLogic } from './hooks/useGameLogic';
+import { useUserPrefs } from './hooks/useUserPrefs';
 import { BOARD_SIZES, DIFFICULTIES } from './levels';
 import type { BoardSize, Difficulty } from './types';
 import { Board } from './components/Board';
@@ -37,20 +38,43 @@ import {
 
 // MARK: App
 export default function App() {
-  const [isDark, setIsDark] = useState<boolean>(true);
-  const [boardSize, setBoardSize] = useState<BoardSize>(8);
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+  const { prefs, setPref } = useUserPrefs();
+  const { isDark, boardSize, difficulty, autoCross } = prefs;
+  const setIsDark = (v: boolean) => setPref('isDark', v);
+  const setBoardSize = (v: BoardSize) => setPref('boardSize', v);
+  const setDifficulty = (v: Difficulty) => setPref('difficulty', v);
   const [configOpen, setConfigOpen] = useState<boolean>(false);
+  const [isEraseMode, setIsEraseMode] = useState<boolean>(false);
   const [pendingChange, setPendingChange] = useState<
     { type: 'size'; value: BoardSize } | { type: 'difficulty'; value: Difficulty } | null
   >(null);
+  // pending action for reset / new-game confirmations
+  const [pendingAction, setPendingAction] = useState<'reset' | 'newGame' | null>(null);
 
   const requestChange = (change: NonNullable<typeof pendingChange>) => {
-    if (gameState === 'playing' && moveCount > 1) {
+    if (gameState === 'playing' && moveCount > 0) {
       setPendingChange(change);
     } else {
       applyChange(change);
     }
+  };
+
+  const handleReset = () => {
+    setIsEraseMode(false);
+    if (gameState === 'playing' && moveCount > 0) setPendingAction('reset');
+    else resetGame();
+  };
+
+  const handleNewGame = () => {
+    setIsEraseMode(false);
+    if (gameState === 'playing' && moveCount > 0) setPendingAction('newGame');
+    else start();
+  };
+
+  const confirmAction = () => {
+    if (pendingAction === 'reset') resetGame();
+    else if (pendingAction === 'newGame') start();
+    setPendingAction(null);
   };
 
   const applyChange = (change: NonNullable<typeof pendingChange>) => {
@@ -84,20 +108,22 @@ export default function App() {
     start,
     resetGame,
     hintsRemaining,
+    hintsMax,
     hintCell,
     requestHint,
     dragCross,
-  } = useGameLogic(boardSize, difficulty);
+    eraseCell,
+  } = useGameLogic(boardSize, difficulty, autoCross, (v) => setPref('autoCross', v));
 
   return (
     <div className={`h-[100dvh] w-full overflow-hidden flex flex-col font-sans transition-colors duration-200 select-none bg-secondary`}>
       {/* MARK: Header */}
-      <header className="h-14 sm:h-16 shrink-0 px-4 sm:px-6 flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 bg-foreground dark:bg-background z-10">
+      <header className="h-10 md:h-16 shrink-0 px-4 sm:px-6 flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 shadow-lg bg-background z-10">
         <div className="flex items-center gap-3 h-full">
-          <img src={logo} alt="Lucky Queens" className="h-full w-auto py-2" />
-          <h1 className="text-sm font-medium tracking-tight bg-gradient-to-r from-emerald-300 to-teal-500 bg-clip-text text-transparent">
+          <img src={logo} alt="Lucky Queens" className="h-6 md:h-9 w-auto mb-1" />
+          <p className="text-2xl font-bold md:text-4xl tracking-tight bg-gradient-to-r from-emerald-300 to-teal-500 bg-clip-text text-transparent">
             {strings.title}
-          </h1>
+          </p>
           <span className="hidden capitalize sm:inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary text-slate-700 dark:text-slate-300">
             {boardSize}×{boardSize} · {difficulty}
           </span>
@@ -111,7 +137,7 @@ export default function App() {
               <HelpCircle className="h-4 w-4" />
               <span className="hidden md:inline">{strings.helpTitle}</span>
             </DrawerTrigger>
-            <DrawerContent className="inset-y-0 right-[2.5vw] md:right-[2vw] text-primary left-auto top-[5vh] md:top-[5dvh] bottom-auto mt-0 w-[95vw] md:w-[50vw] rounded-2xl border bg-background p-6 shadow-2xl flex flex-col">
+            <DrawerContent className="inset-y-0 right-[2.5vw] md:right-[2vw] text-primary left-auto top-[5vh] md:top-[5dvh] bottom-auto mt-0 w-full md:w-[50vw] rounded-none md:rounded-2xl border-none md:border bg-background p-6 shadow-2xl flex flex-col">
               <DrawerHeader className="px-0 pt-0 pb-4 border-b text-left shrink-0 flex items-center justify-between">
                 <DrawerTitle className="text-xl font-bold flex justify-between w-full">
                   {strings.helpTitle}
@@ -199,7 +225,7 @@ export default function App() {
               <Settings className="h-4 w-4" />
               <span className="hidden md:inline">{strings.configTitle}</span>
             </DrawerTrigger>
-            <DrawerContent className="inset-y-0 right-[2.5vw] md:right-[2vw] text-primary left-auto top-[5vh] md:top-[5dvh] bottom-auto mt-0 w-[95vw] md:w-[30vw] rounded-2xl border bg-background p-6 shadow-2xl flex flex-col">
+            <DrawerContent className="inset-y-0 right-[2.5vw] md:right-[2vw] text-primary left-auto top-[5vh] md:top-[5dvh] bottom-auto mt-0 w-full md:w-[30vw] rounded-none md:rounded-2xl border-none md:border bg-background p-6 shadow-2xl flex flex-col">
               <DrawerHeader className="px-0 pt-0 pb-4 border-b text-left shrink-0 flex items-center justify-between">
                 <DrawerTitle className="text-xl font-bold flex justify-between w-full">
                   {strings.configTitle}
@@ -330,16 +356,40 @@ export default function App() {
         </div>
       </header>
 
-      {/* MARK: Board */}
       <main className="flex-1 min-h-0 flex flex-col items-center justify-center p-2 sm:p-4 overflow-hidden relative">
-        <Board
-          board={board}
-          conflicts={conflicts}
-          hintCell={hintCell}
-          boardSize={boardSize}
-          onCellClick={toggleCell}
-          onCellDrag={dragCross}
-        />
+        <div className="inline-flex flex-col">
+          {/* MARK: Stats Bar */}
+          {gameState === 'playing' && (
+            <div className="flex items-center justify-between mx-4 px-4 shadow-[0_0_20px_rgba(0,0,0,0.2),0_0_8px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.04)] dark:shadow-[0_0_40px_rgba(0,0,0,0.4),0_0_8px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.04)] rounded rounded-3xl border border-slate-500 dark:border-slate-600 bg-secondary">
+              <div className="py-1">
+                <span className="text-xs font-bold tracking-wider text-slate-400 dark:text-slate-500 block">{strings.timeLabel}</span>
+                <span className="text-base font-mono font-bold text-slate-700 dark:text-slate-300">{formatTime(secondsElapsed)}</span>
+              </div>
+              <div className="flex flex-col items-center py-1">
+                <span className="text-lg font-bold capitalize text-slate-700 dark:text-slate-300 block">{difficulty} {boardSize}×{boardSize}</span>
+              </div>
+              <div className="text-right py-1">
+                <span className="text-xs font-bold tracking-wider text-slate-400 dark:text-slate-500 block">{strings.movesLabel}</span>
+                <span className="text-base font-mono font-bold text-slate-700 dark:text-slate-300">{moveCount}</span>
+              </div>
+            </div>
+          )}
+          <Board
+            board={board}
+            conflicts={conflicts}
+            hintCell={hintCell}
+            boardSize={boardSize}
+            isEraseMode={isEraseMode}
+            onCellClick={toggleCell}
+            onCellDrag={dragCross}
+            onCellErase={eraseCell}
+          />
+          {isEraseMode && (
+            <p className="text-center text-xs font-semibold text-amber-600 dark:text-amber-300 tracking-wide -mt-2 mb-1">
+              {strings.eraseModeLabel}
+            </p>
+          )}
+        </div>
 
         {/* MARK: Start Overlay */}
         {gameState === 'idle' && (
@@ -347,7 +397,7 @@ export default function App() {
             <div className="flex flex-col items-center gap-6 text-center">
               <div className="flex flex-col items-center gap-2">
                 <img src={logo} alt="Lucky Queens" className="h-16 w-16" />
-                <h2 className="text-3xl font-black bg-gradient-to-r from-emerald-300 to-teal-500 bg-clip-text text-transparent tracking-tight">Lucky Queens</h2>
+                <span className="text-4xl font-medium bg-gradient-to-r from-emerald-300 to-teal-500 bg-clip-text text-transparent tracking-tight">Lucky Queens</span>
                 <p className="text-slate-300 text-sm font-medium">
                   {boardSize}×{boardSize} &middot; <span className="capitalize">{difficulty}</span> &middot; Auto-fill {isAutoCrossEnabled ? 'on' : 'off'}
                 </p>
@@ -407,20 +457,7 @@ export default function App() {
       </main>
 
       {/* MARK: Footer */}
-      <footer className="shrink-0 h-14 sm:h-16 px-4 sm:px-6 border-t border-slate-200 dark:border-slate-800/80 bg-foreground dark:bg-background flex items-center justify-between z-10">
-        <div className="flex items-center gap-6">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">{strings.timeLabel}</span>
-            <span className="text-base sm:text-lg font-mono font-bold text-slate-800 dark:text-slate-200">{formatTime(secondsElapsed)}</span>
-          </div>
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">{strings.movesLabel}</span>
-            <span className="text-base sm:text-lg font-mono font-bold text-slate-800 dark:text-slate-200">{moveCount}</span>
-          </div>
-        </div>
-
-        {/* Hint Button */}
-        <div className="flex items-center gap-2 sm:gap-3">
+      <footer className="shrink-0 h-14 sm:h-16 flex items-center justify-evenly md:justify-end gap-0 md:gap-2 z-10 border-t border-slate-200 dark:border-slate-800/80 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_24px_rgba(0,0,0,0.4)] bg-background">
           <Button
             variant="outline"
             size="sm"
@@ -432,23 +469,67 @@ export default function App() {
               }`}
           >
             <Lightbulb className="h-4 w-4 text-green-800 dark:text-green-300 shrink-0" />
-            <span>{strings.hintButton} ({hintsRemaining})</span>
+            <span>{strings.hintButton} ({hintsRemaining}/{hintsMax})</span>
           </Button>
 
-        {/* Reset Button */}
           <Button
             variant="secondary"
             size="sm"
-            onClick={resetGame}
-            disabled={gameState !== 'playing'}
+            onClick={() => setIsEraseMode(v => !v)}
+            disabled={gameState !== 'playing' || moveCount === 0}
+            className={`font-bold rounded-xl transition-all cursor-pointer gap-1.5 shadow-2xs ${isEraseMode
+                ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-200 dark:hover:bg-amber-900/80 border-amber-300 dark:border-amber-700/50'
+                : ''
+              }`}
+          >
+            <Eraser className={`h-3.5 w-3.5 ${isEraseMode ? 'text-amber-700 dark:text-amber-300' : ''}`} />
+            <span>Erase</span>
+          </Button>
+
+          {/* Reset Button */}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleReset}
+            disabled={gameState !== 'playing' || moveCount === 0}
             className="font-bold rounded-xl transition-colors cursor-pointer gap-1.5"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>{strings.resetButton}</span>
           </Button>
-        </div>
+
+          {/* New Game Button */}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleNewGame}
+            className="font-bold rounded-xl transition-colors cursor-pointer gap-1.5"
+          >
+            <PlusSquare className="h-3.5 w-3.5" />
+            <span>New Game</span>
+          </Button>
       </footer>
-      
+
+      {/* MARK: Action Confirm Dialog */}
+      <AlertDialog open={pendingAction !== null} onOpenChange={(open) => !open && setPendingAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingAction === 'reset' ? strings.resetTitle : strings.newGameTitle}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingAction === 'reset' ? strings.resetDescription : strings.newGameDescription}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{strings.discardCancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmAction} className="bg-red-600 hover:bg-red-500 text-white">
+              {pendingAction === 'reset' ? strings.resetConfirm : strings.newGameConfirm}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* MARK: Discard Dialog */}
       <AlertDialog open={pendingChange !== null} onOpenChange={(open) => !open && setPendingChange(null)}>
         <AlertDialogContent>

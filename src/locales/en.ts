@@ -17,6 +17,12 @@ export interface Dictionary {
   discardDescription: string;
   discardConfirm: string;
   discardCancel: string;
+  resetTitle: string;
+  resetDescription: string;
+  resetConfirm: string;
+  newGameTitle: string;
+  newGameDescription: string;
+  newGameConfirm: string;
   configTitle: string;
   helpTitle: string;
   helpIntro: string;
@@ -31,6 +37,7 @@ export interface Dictionary {
   strategies: { title: string; desc: string }[];
   difficultyGuideHeading: string;
   difficultyGuide: DifficultyEntry[];
+  eraseModeLabel: string;
 }
 
 export const en: Dictionary = {
@@ -47,6 +54,12 @@ export const en: Dictionary = {
   discardDescription: 'You have an active game in progress. Changing this setting will start a new puzzle and your current progress will be lost.',
   discardConfirm: 'Discard & Start New Game',
   discardCancel: 'Keep Playing',
+  resetTitle: 'Reset the board?',
+  resetDescription: 'This will clear all your marks and queens. Your progress on this puzzle will be lost.',
+  resetConfirm: 'Reset Board',
+  newGameTitle: 'Start a new game?',
+  newGameDescription: 'Your current progress will be lost and a brand new puzzle will be generated.',
+  newGameConfirm: 'Start New Game',
   configTitle: 'Configurations',
   helpTitle: 'How to Play',
   helpIntro: 'Place exactly one queen in every row, column, and colour region — with no two queens touching, not even at the corners.',
@@ -112,6 +125,8 @@ export const en: Dictionary = {
   ],
 
   difficultyGuideHeading: 'Difficulty Guide',
+  eraseModeLabel: 'Erase Mode active — tap or drag to clear cells',
+
   difficultyGuide: [
     {
       level: 'Easy',

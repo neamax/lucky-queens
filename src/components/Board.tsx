@@ -9,15 +9,20 @@ interface BoardProps {
   conflicts: Set<string>;
   hintCell: Position | null;
   boardSize: BoardSize;
+  isEraseMode: boolean;
   onCellClick: (row: number, col: number) => void;
   onCellDrag: (row: number, col: number) => void;
+  onCellErase: (row: number, col: number) => void;
 }
 
-export function Board({ board, conflicts, hintCell, boardSize, onCellClick, onCellDrag }: BoardProps) {
+export function Board({ board, conflicts, hintCell, boardSize, isEraseMode, onCellClick, onCellDrag, onCellErase }: BoardProps) {
   // MARK: Drag State
   const isDragging = useRef(false);
   const lastDragged = useRef<string | null>(null);
   const didDrag = useRef(false);
+  // tracks the cell key where pointer-down fired so we can suppress the
+  // synthetic click that mobile browsers fire after touchend on the same cell
+  const pointerDownKey = useRef<string | null>(null);
 
   const getBorders = (row: number, col: number, regionId: number) => {
     return {
@@ -38,13 +43,10 @@ export function Board({ board, conflicts, hintCell, boardSize, onCellClick, onCe
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const key = cellFromPoint(e.clientX, e.clientY);
     if (!key) return;
-    const [r, c] = key.split('-').map(Number);
-    // only start drag if the origin cell is empty
-    if (board[r][c].mark !== 'empty') return;
     isDragging.current = true;
     didDrag.current = false;
     lastDragged.current = key;
-    onCellDrag(r, c);
+    pointerDownKey.current = key;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
@@ -52,23 +54,36 @@ export function Board({ board, conflicts, hintCell, boardSize, onCellClick, onCe
     if (!isDragging.current) return;
     const key = cellFromPoint(e.clientX, e.clientY);
     if (!key || key === lastDragged.current) return;
+    // first move away from origin: also cross the origin cell if it was empty
+    if (!didDrag.current && pointerDownKey.current) {
+      const [or, oc] = pointerDownKey.current.split('-').map(Number);
+      if (isEraseMode) onCellErase(or, oc);
+      else if (board[or][oc].mark === 'empty') onCellDrag(or, oc);
+    }
     didDrag.current = true;
     lastDragged.current = key;
     const [r, c] = key.split('-').map(Number);
-    onCellDrag(r, c);
+    if (isEraseMode) onCellErase(r, c);
+    else onCellDrag(r, c);
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (_e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging.current) return;
     isDragging.current = false;
     lastDragged.current = null;
+    // tap (no drag): erase or cycle depending on mode
+    if (!didDrag.current && pointerDownKey.current) {
+      const [r, c] = pointerDownKey.current.split('-').map(Number);
+      if (isEraseMode) onCellErase(r, c);
+      else onCellClick(r, c);
+    }
+    didDrag.current = false;
+    pointerDownKey.current = null;
   };
 
-  // suppress click on the origin cell when a multi-cell drag occurred
+  // block all synthetic clicks — all interaction is handled via pointer events
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (didDrag.current) {
-      e.stopPropagation();
-      didDrag.current = false;
-    }
+    e.stopPropagation();
   };
 
 //   MARK: Brd Cntnr
@@ -92,7 +107,6 @@ export function Board({ board, conflicts, hintCell, boardSize, onCellClick, onCe
                 isConflict={conflicts.has(`${rIdx}-${cIdx}`)}
                 isHinted={hintCell?.row === rIdx && hintCell?.col === cIdx}
                 borders={getBorders(rIdx, cIdx, cell.regionId)}
-                onClick={onCellClick}
               />
             ))}
           </div>

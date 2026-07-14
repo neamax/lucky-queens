@@ -8,9 +8,20 @@ type GameState = 'idle' | 'playing' | 'won';
 
 const EMPTY_BOARD: CellData[][] = [];
 
-export function useGameLogic(size: BoardSize, difficulty: Difficulty) {
+export function useGameLogic(
+    size: BoardSize,
+    difficulty: Difficulty,
+    initialAutoCross = true,
+    onAutoCrossChange?: (v: boolean) => void,
+) {
     const [gameState, setGameState] = useState<GameState>('idle');
-    const [isAutoCrossEnabled, setIsAutoCrossEnabled] = useState<boolean>(true);
+    const [isAutoCrossEnabled, setIsAutoCrossEnabledRaw] = useState<boolean>(initialAutoCross);
+
+    const setIsAutoCrossEnabled = useCallback((v: boolean) => {
+        setIsAutoCrossEnabledRaw(v);
+        onAutoCrossChange?.(v);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     const [moveCount, setMoveCount] = useState<number>(0);
     const [secondsElapsed, setSecondsElapsed] = useState<number>(0);
     const [hintsRemaining, setHintsRemaining] = useState<number>(hintsForDifficulty[difficulty]);
@@ -198,6 +209,23 @@ export function useGameLogic(size: BoardSize, difficulty: Difficulty) {
 
     // MARK: Drag Cross
     // applies a cross to a single empty cell — used by drag gestures
+    // MARK: Erase
+    // clears any marked cell back to empty
+    const eraseCell = useCallback((row: number, col: number) => {
+        if (gameState !== 'playing') return;
+        if (board[row][col].mark === 'empty') return;
+        // if erasing a queen, also remove its auto-cross record
+        if (board[row][col].mark === 'queen') {
+            autoCrossed.current.delete(`${row}-${col}`);
+        }
+        setMoveCount(prev => prev + 1);
+        setBoard(prev => {
+            const newBoard = prev.map(r => r.map(c => ({ ...c })));
+            newBoard[row][col].mark = 'empty';
+            return newBoard;
+        });
+    }, [gameState, board]);
+
     const dragCross = useCallback((row: number, col: number) => {
         if (gameState !== 'playing') return;
         setBoard(prev => {
@@ -234,9 +262,11 @@ export function useGameLogic(size: BoardSize, difficulty: Difficulty) {
         start,
         resetGame,
         hintsRemaining,
+        hintsMax: hintsForDifficulty[difficulty],
         hintCell,
         requestHint,
         dragCross,
+        eraseCell,
     };
 }
 
