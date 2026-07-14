@@ -207,10 +207,7 @@ export function useGameLogic(
         });
     }, [gameState, isAutoCrossEnabled, hintCell, board]);
 
-    // MARK: Drag Cross
-    // applies a cross to a single empty cell — used by drag gestures
-    // MARK: Erase
-    // clears any marked cell back to empty
+    // MARK: Drag Cross & Erase
     const eraseCell = useCallback((row: number, col: number) => {
         if (gameState !== 'playing') return;
         if (board[row][col].mark === 'empty') return;

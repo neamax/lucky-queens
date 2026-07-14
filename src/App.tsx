@@ -236,27 +236,52 @@ export default function App() {
               </DrawerHeader>
 
               <div className="flex-1 overflow-y-auto py-6 space-y-6">
-                {/* theme toggle */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-secondary border border-secondary">
-                  <span className="text-sm font-semibold">{strings.themeLabel}</span>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setIsDark(!isDark)}
-                    className="gap-2 font-medium cursor-pointer"
-                  >
-                    {isDark ? (
-                      <>
-                        <Sun className="h-4 w-4" />
-                        <span>Light Mode</span>
-                      </>
-                    ) : (
-                      <>
-                        <Moon className="h-4 w-4" />
-                        <span>Dark Mode</span>
-                      </>
-                    )}
-                  </Button>
+                <div className="flex flex-col items-center justify-between p-3 rounded-xl bg-secondary border border-secondary">
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs font-semibold tracking-wider text-primary">
+                        Language
+                      </label>
+                      <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold tracking-wide bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-700/50">
+                        Soon
+                      </span>
+                    </div>
+                    <Select value="en">
+                      <SelectTrigger className="w-[50%] rounded-xl py-5 font-medium cursor-not-allowed bg-secondary border border-secondary">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ar" className="font-medium">Arabic</SelectItem>
+                        <SelectItem value="en" className="font-medium">English</SelectItem>
+                        <SelectItem value="fr" className="font-medium">French</SelectItem>
+                        <SelectItem value="es" className="font-medium">Spanish</SelectItem>
+                        <SelectItem value="it" className="font-medium">Italian</SelectItem>
+                        <SelectItem value="ch" className="font-medium">Chinese</SelectItem>
+                        <SelectItem value="jp" className="font-medium">Japanese</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-sm font-semibold">{strings.themeLabel}</span>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setIsDark(!isDark)}
+                      className="gap-2 font-medium cursor-pointer"
+                    >
+                      {isDark ? (
+                        <>
+                          <Sun className="h-4 w-4" />
+                          <span>Light Mode</span>
+                        </>
+                      ) : (
+                        <>
+                          <Moon className="h-4 w-4" />
+                          <span>Dark Mode</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
 
                 {/* difficulty selector */}
@@ -393,12 +418,12 @@ export default function App() {
 
         {/* MARK: Start Overlay */}
         {gameState === 'idle' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-20 p-4 animate-in fade-in duration-300">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-mist-100 dark:bg-mist-900 z-20 p-4 animate-in fade-in duration-300">
             <div className="flex flex-col items-center gap-6 text-center">
               <div className="flex flex-col items-center gap-2">
                 <img src={logo} alt="Lucky Queens" className="h-16 w-16" />
                 <span className="text-4xl font-medium bg-gradient-to-r from-emerald-300 to-teal-500 bg-clip-text text-transparent tracking-tight">Lucky Queens</span>
-                <p className="text-slate-300 text-sm font-medium">
+                <p className="text-slate-600 dark:text-slate-300 text-sm font-medium">
                   {boardSize}×{boardSize} &middot; <span className="capitalize">{difficulty}</span> &middot; Auto-fill {isAutoCrossEnabled ? 'on' : 'off'}
                 </p>
               </div>
@@ -413,7 +438,7 @@ export default function App() {
                 <Button
                   variant="link"
                   onClick={() => setConfigOpen(true)}
-                  className="gap-1.5 text-slate-300 hover:text-white cursor-pointer"
+                  className="gap-1.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 cursor-pointer"
                 >
                   <Settings className="h-4 w-4" />
                   Open Configurations
@@ -457,57 +482,57 @@ export default function App() {
       </main>
 
       {/* MARK: Footer */}
-      <footer className="shrink-0 h-14 sm:h-16 flex items-center justify-evenly md:justify-end gap-0 md:gap-2 z-10 border-t border-slate-200 dark:border-slate-800/80 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_24px_rgba(0,0,0,0.4)] bg-background">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={requestHint}
-            disabled={hintsRemaining === 0 || gameState !== 'playing'}
-            className={`font-bold rounded-xl transition-all cursor-pointer gap-1.5 shadow-2xs ${hintsRemaining > 0 && gameState === 'playing'
-              ? 'bg-green-100 text-green-900 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-200 dark:hover:bg-green-900/80 border-green-300 dark:border-green-700/50'
-              : 'opacity-50 cursor-not-allowed'
-              }`}
-          >
-            <Lightbulb className="h-4 w-4 text-green-800 dark:text-green-300 shrink-0" />
-            <span>{strings.hintButton} ({hintsRemaining}/{hintsMax})</span>
-          </Button>
+      <footer className="shrink-0 h-14 sm:h-16 pr-0 md:pr-4 flex items-center justify-evenly md:justify-end gap-0 md:gap-2 z-10 border-t border-slate-200 dark:border-slate-800/80 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_24px_rgba(0,0,0,0.4)] bg-background">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={requestHint}
+          disabled={hintsRemaining === 0 || gameState !== 'playing'}
+          className={`font-bold rounded-xl transition-all cursor-pointer gap-1.5 shadow-2xs ${hintsRemaining > 0 && gameState === 'playing'
+            ? 'bg-green-100 text-green-900 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-200 dark:hover:bg-green-900/80 border-green-300 dark:border-green-700/50'
+            : 'opacity-50 cursor-not-allowed'
+            }`}
+        >
+          <Lightbulb className="h-4 w-4 text-green-800 dark:text-green-300 shrink-0" />
+          <span>{strings.hintButton} ({hintsRemaining}/{hintsMax})</span>
+        </Button>
 
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setIsEraseMode(v => !v)}
-            disabled={gameState !== 'playing' || moveCount === 0}
-            className={`font-bold rounded-xl transition-all cursor-pointer gap-1.5 shadow-2xs ${isEraseMode
-                ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-200 dark:hover:bg-amber-900/80 border-amber-300 dark:border-amber-700/50'
-                : ''
-              }`}
-          >
-            <Eraser className={`h-3.5 w-3.5 ${isEraseMode ? 'text-amber-700 dark:text-amber-300' : ''}`} />
-            <span>Erase</span>
-          </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => setIsEraseMode(v => !v)}
+          disabled={gameState !== 'playing' || moveCount === 0}
+          className={`font-bold rounded-xl transition-all cursor-pointer gap-1.5 shadow-2xs ${isEraseMode
+            ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-200 dark:hover:bg-amber-900/80 border-amber-300 dark:border-amber-700/50'
+            : ''
+            }`}
+        >
+          <Eraser className={`h-3.5 w-3.5 ${isEraseMode ? 'text-amber-700 dark:text-amber-300' : ''}`} />
+          <span>Erase</span>
+        </Button>
 
-          {/* Reset Button */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleReset}
-            disabled={gameState !== 'playing' || moveCount === 0}
-            className="font-bold rounded-xl transition-colors cursor-pointer gap-1.5"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            <span>{strings.resetButton}</span>
-          </Button>
+        {/* Reset Button */}
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={handleReset}
+          disabled={gameState !== 'playing' || moveCount === 0}
+          className="font-bold rounded-xl transition-colors cursor-pointer gap-1.5"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          <span>{strings.resetButton}</span>
+        </Button>
 
-          {/* New Game Button */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleNewGame}
-            className="font-bold rounded-xl transition-colors cursor-pointer gap-1.5"
-          >
-            <PlusSquare className="h-3.5 w-3.5" />
-            <span>New Game</span>
-          </Button>
+        {/* New Game Button */}
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={handleNewGame}
+          className="font-bold rounded-xl transition-colors cursor-pointer gap-1.5"
+        >
+          <PlusSquare className="h-3.5 w-3.5" />
+          <span>New Game</span>
+        </Button>
       </footer>
 
       {/* MARK: Action Confirm Dialog */}

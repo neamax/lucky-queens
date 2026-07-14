@@ -16,21 +16,21 @@ interface CellProps {
 }
 
 const regionColours: Record<number, string> = {
-    1: 'from-olive-300 to-olive-200',
-    2: 'from-mist-300 to-mist-200',
-    3: 'from-mauve-300 to-mauve-200',
-    4: 'from-slate-300 to-slate-200',
-    5: 'from-rose-200 to-rose-100',
-    6: 'from-purple-200 to-purple-100',
-    7: 'from-blue-200 to-blue-100',
-    8: 'from-white to-gray-100',
-    9: 'from-lime-200 to-lime-100',
-    10: 'from-pink-200 to-pink-100',
-    11: 'from-indigo-300 to-indigo-200',
-    12: 'from-yellow-200 to-yellow-100',
-    13: 'from-red-300 to-red-200',
-    14: 'from-orange-300 to-orange-200',
-    15: 'from-emerald-200 to-emerald-100',
+    1: 'from-olive-400 to-olive-200',
+    2: 'from-mauve-300/85 to-mauve-50',
+    3: 'from-rose-200/80 to-rose-50',
+    4: 'from-purple-300 to-purple-100',
+    5: 'from-blue-200 to-blue-50',
+    6: 'from-white to-gray-200',
+    7: 'from-lime-200 to-lime-50',
+    8: 'from-slate-300/70 to-slate-50',
+    9: 'from-pink-200 to-pink-100',
+    10: 'from-indigo-300 to-indigo-100',
+    11: 'from-yellow-200 to-yellow-50',
+    12: 'from-red-300 to-red-200',
+    13: 'from-orange-300 to-orange-100',
+    14: 'from-mist-300 to-mist-50',
+    15: 'from-emerald-200 to-emerald-50',
 };
 
 const cellSizeClass: Record<BoardSize, string> = {
