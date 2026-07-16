@@ -269,7 +269,6 @@ function fixLinearRegions(
 
   for (const regionId of linearIds) {
     if (excess <= 0) break;
-    const cells = regionCells.get(regionId)!;
     const queenCell = queens.find((_q, i) => i + 1 === regionId);
     // donate cells one by one until the region is no longer linear
     let broken = false;
