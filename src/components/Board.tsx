@@ -90,7 +90,7 @@ export function Board({ board, conflicts, hintCell, boardSize, isEraseMode, onCe
   return (
     <div className="flex flex-col items-center justify-center p-4">
       <div
-        className="overflow-hidden rounded-3xl border-2 border-slate-900 shadow-[0_12px_40px_rgba(0,0,0,0.5),0_2px_8px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.04)] bg-slate-900 touch-none"
+        className="overflow-hidden rounded-3xl border-2 border-mist-500 shadow-[0_12px_40px_rgba(0,0,0,0.5),0_2px_8px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.04)] bg-slate-900 touch-none"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}

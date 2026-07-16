@@ -108,7 +108,6 @@ export default function App() {
     start,
     resetGame,
     hintsRemaining,
-    hintsMax,
     hintCell,
     requestHint,
     dragCross,
@@ -116,7 +115,7 @@ export default function App() {
   } = useGameLogic(boardSize, difficulty, autoCross, (v) => setPref('autoCross', v));
 
   return (
-    <div className={`h-[100dvh] w-full overflow-hidden flex flex-col font-sans transition-colors duration-200 select-none bg-secondary`}>
+    <div className={`h-[100dvh] w-full overflow-hidden bg-mist-100 dark:bg-mist-900 flex flex-col font-sans transition-colors duration-200 select-none`}>
       {/* MARK: Header */}
       <header className="h-10 md:h-16 shrink-0 px-4 sm:px-6 flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 shadow-lg bg-background z-10">
         <div className="flex items-center gap-3 h-full">
@@ -242,12 +241,12 @@ export default function App() {
                       <label className="text-xs font-semibold tracking-wider text-primary">
                         Language
                       </label>
-                      <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold tracking-wide bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-700/50">
+                      <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold tracking-wide bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 border border-green-200 dark:border-green-700/50">
                         Soon
                       </span>
                     </div>
                     <Select value="en">
-                      <SelectTrigger className="w-[50%] rounded-xl py-5 font-medium cursor-not-allowed bg-secondary border border-secondary">
+                      <SelectTrigger className="w-[50%] rounded-xl py-5 font-medium cursor-not-allowed bg-gray-200 dark:bg-secondary border border-secondary">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -385,7 +384,7 @@ export default function App() {
         <div className="inline-flex flex-col">
           {/* MARK: Stats Bar */}
           {gameState === 'playing' && (
-            <div className="flex items-center justify-between mx-4 px-4 shadow-[0_0_20px_rgba(0,0,0,0.2),0_0_8px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.04)] dark:shadow-[0_0_40px_rgba(0,0,0,0.4),0_0_8px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.04)] rounded rounded-3xl border border-slate-500 dark:border-slate-600 bg-secondary">
+            <div className="flex items-center justify-between mx-4 px-4 shadow-[0_0_20px_rgba(0,0,0,0.2),0_0_8px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.04)] dark:shadow-[0_0_40px_rgba(0,0,0,0.4),0_0_8px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.04)] rounded rounded-3xl border border-slate-400 dark:border-slate-600 bg-secondary">
               <div className="py-1">
                 <span className="text-xs font-bold tracking-wider text-slate-400 dark:text-slate-500 block">{strings.timeLabel}</span>
                 <span className="text-base font-mono font-bold text-slate-700 dark:text-slate-300">{formatTime(secondsElapsed)}</span>
@@ -482,56 +481,52 @@ export default function App() {
       </main>
 
       {/* MARK: Footer */}
-      <footer className="shrink-0 h-14 sm:h-16 pr-0 md:pr-4 flex items-center justify-evenly md:justify-end gap-0 md:gap-2 z-10 border-t border-slate-200 dark:border-slate-800/80 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_24px_rgba(0,0,0,0.4)] bg-background">
+      <footer className="p-1 mb-4 mx-4 border border-mist-400/80 dark:border-mist-600 rounded-4xl flex items-center justify-evenly gap-0 md:gap-2 z-10 bg-secondary dark:bg-secondary/70">
         <Button
-          variant="outline"
-          size="sm"
+          variant="link"
           onClick={requestHint}
           disabled={hintsRemaining === 0 || gameState !== 'playing'}
-          className={`font-bold rounded-xl transition-all cursor-pointer gap-1.5 shadow-2xs ${hintsRemaining > 0 && gameState === 'playing'
-            ? 'bg-green-100 text-green-900 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-200 dark:hover:bg-green-900/80 border-green-300 dark:border-green-700/50'
+          className={`h-full pt-1 min-w-[20%] flex flex-col items-center justify-center rounded-2xl transition-all cursor-pointer shadow-2xs bg-green-100 text-green-900 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-200 dark:hover:bg-green-900/80 border-green-300 dark:border-green-700/50 ${hintsRemaining > 0 && gameState === 'playing'
+            ? ''
             : 'opacity-50 cursor-not-allowed'
             }`}
         >
-          <Lightbulb className="h-4 w-4 text-green-800 dark:text-green-300 shrink-0" />
-          <span>{strings.hintButton} ({hintsRemaining}/{hintsMax})</span>
+          <Lightbulb className="h-5 w-5 text-green-800 dark:text-green-300 shrink-0" />
+          <span>{strings.hintButton} ({hintsRemaining})</span>
         </Button>
 
         <Button
-          variant="secondary"
-          size="sm"
+          variant="link"
           onClick={() => setIsEraseMode(v => !v)}
           disabled={gameState !== 'playing' || moveCount === 0}
-          className={`font-bold rounded-xl transition-all cursor-pointer gap-1.5 shadow-2xs ${isEraseMode
-            ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-200 dark:hover:bg-amber-900/80 border-amber-300 dark:border-amber-700/50'
+          className={`h-full pt-1 min-w-[20%] flex flex-col items-center justify-center rounded-2xl bg-gray-200 dark:bg-secondary transition-all cursor-pointer shadow-2xs ${isEraseMode
+            ? 'text-amber-900 dark:text-amber-200'
             : ''
             }`}
         >
-          <Eraser className={`h-3.5 w-3.5 ${isEraseMode ? 'text-amber-700 dark:text-amber-300' : ''}`} />
+          <Eraser className={`h-5 w-5 ${isEraseMode ? 'text-amber-700 dark:text-amber-300' : ''}`} />
           <span>Erase</span>
         </Button>
 
         {/* Reset Button */}
         <Button
-          variant="secondary"
-          size="sm"
+          variant="link"
           onClick={handleReset}
           disabled={gameState !== 'playing' || moveCount === 0}
-          className="font-bold rounded-xl transition-colors cursor-pointer gap-1.5"
+          className="h-full pt-1 min-w-[20%] flex flex-col items-center justify-center rounded-2xl bg-gray-200 dark:bg-secondary transition-all cursor-pointer shadow-2xs rounded-xl transition-colors cursor-pointer gap-1.5"
         >
-          <RotateCcw className="h-3.5 w-3.5" />
+          <RotateCcw className="h-5 w-5" />
           <span>{strings.resetButton}</span>
         </Button>
 
         {/* New Game Button */}
         <Button
-          variant="secondary"
-          size="sm"
+          variant="link"
           onClick={handleNewGame}
-          className="font-bold rounded-xl transition-colors cursor-pointer gap-1.5"
+          className="h-full pt-1 min-w-[20%] flex flex-col items-center justify-center rounded-2xl bg-gray-200 dark:bg-secondary transition-all cursor-pointer shadow-2xs rounded-xl transition-colors cursor-pointer gap-1.5"
         >
-          <PlusSquare className="h-3.5 w-3.5" />
-          <span>New Game</span>
+          <PlusSquare className="h-5 w-5" />
+          <span>New</span>
         </Button>
       </footer>
 

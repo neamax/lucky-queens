@@ -108,6 +108,19 @@ const minSingleCellRegions: Record<Difficulty, number> = {
   hard:   0,
 };
 
+// MARK: Single Row/Column Region Limit
+const maxLinearRegions: Record<Difficulty, number> = {
+  easy:   3,
+  medium: 2,
+  hard:   1,
+};
+
+const minLinearRegions: Record<Difficulty, number> = {
+  easy:   1,
+  medium: 1,
+  hard:   0,
+};
+
 // grows excess single-cell regions by stealing a cell from the largest adjacent neighbour,
 // and ensures a minimum number of single-cell regions by carving the queen cell out of a large region
 function fixSingleCellRegions(
@@ -165,7 +178,7 @@ function fixSingleCellRegions(
 
   let nextId = size + 1;
 
-  for (let attempt = 0; attempt < deficit; attempt++) {
+  for (let _attempt = 0; _attempt < deficit; _attempt++) {
     regionSizes = getRegionSizes();
 
     const candidate = queens
@@ -217,6 +230,120 @@ function fixSingleCellRegions(
   }
 }
 
+function isLinearRegion(cells: [number, number][]): boolean {
+  if (cells.length < 2) return false;
+  const sameRow = cells.every(([r]) => r === cells[0][0]);
+  const sameCol = cells.every(([, c]) => c === cells[0][1]);
+  return sameRow || sameCol;
+}
+
+// MARK: Single Row/Column Region Fix
+function fixLinearRegions(
+  grid: number[][],
+  size: number,
+  queens: { row: number; col: number }[],
+  min: number,
+  max: number
+): void {
+  const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+  const getRegionCells = () => {
+    const cells = new Map<number, [number, number][]>();
+    for (let r = 0; r < size; r++)
+      for (let c = 0; c < size; c++) {
+        const id = grid[r][c];
+        if (!cells.has(id)) cells.set(id, []);
+        cells.get(id)!.push([r, c]);
+      }
+    return cells;
+  };
+
+  const getLinearIds = (cells: Map<number, [number, number][]>) =>
+    [...cells.entries()].filter(([, cs]) => isLinearRegion(cs)).map(([id]) => id);
+
+  // shrink excess: donate non-queen cells of linear regions to their largest neighbour
+  // never touch single-cell regions (size === 1)
+  let regionCells = getRegionCells();
+  let linearIds = getLinearIds(regionCells);
+  let excess = linearIds.length - max;
+
+  for (const regionId of linearIds) {
+    if (excess <= 0) break;
+    const cells = regionCells.get(regionId)!;
+    const queenCell = queens.find((_q, i) => i + 1 === regionId);
+    // donate cells one by one until the region is no longer linear
+    let broken = false;
+    while (!broken) {
+      const current = regionCells.get(regionId)!;
+      if (!isLinearRegion(current)) { broken = true; break; }
+      const donor = current.find(
+        ([r, c]) => !(queenCell && r === queenCell.row && c === queenCell.col)
+      );
+      if (!donor) break;
+      const [dr2, dc2] = donor;
+      let bestId = -1, bestSz = -1;
+      for (const [dr, dc] of DIRS) {
+        const nr = dr2 + dr, nc = dc2 + dc;
+        if (nr < 0 || nr >= size || nc < 0 || nc >= size) continue;
+        const nId = grid[nr][nc];
+        if (nId === regionId) continue;
+        const nSz = regionCells.get(nId)?.length ?? 0;
+        // never donate to a single-cell region (would merge two singles)
+        if (nSz < 2) continue;
+        if (nSz > bestSz) { bestSz = nSz; bestId = nId; }
+      }
+      if (bestId === -1) break;
+      grid[dr2][dc2] = bestId;
+      regionCells = getRegionCells();
+    }
+    if (!isLinearRegion(regionCells.get(regionId)!)) excess--;
+  }
+
+  // grow deficit: for each missing linear region, pick a queen whose region is not already
+  // linear or single-cell, then greedily absorb all contiguous same-row/col neighbours
+  regionCells = getRegionCells();
+  linearIds = getLinearIds(regionCells);
+  let deficit = min - linearIds.length;
+  if (deficit <= 0) return;
+
+  for (let _attempt = 0; _attempt < deficit; _attempt++) {
+    regionCells = getRegionCells();
+    linearIds = getLinearIds(regionCells);
+    if (min - linearIds.length <= 0) break;
+
+    let carved = false;
+    for (const q of queens) {
+      const qId = grid[q.row][q.col];
+      const cells = regionCells.get(qId)!;
+      if (cells.length === 1) continue;
+      if (isLinearRegion(cells)) continue;
+
+      // try to steal exactly one cell in the queen's row, and one in the queen's column
+      // from a neighbour large enough to spare it (keeps at least 2 cells)
+      const axisDirs: [number, number][] = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+      let stolenRow = false, stolenCol = false;
+
+      for (const [dr, dc] of axisDirs) {
+        const nr = q.row + dr, nc = q.col + dc;
+        if (nr < 0 || nr >= size || nc < 0 || nc >= size) continue;
+        const nId = grid[nr][nc];
+        if (nId === qId) continue;
+        const nSz = regionCells.get(nId)?.length ?? 0;
+        if (nSz < 3) continue;
+        const isRowDir = dr === 0;
+        if (isRowDir && stolenRow) continue;
+        if (!isRowDir && stolenCol) continue;
+        grid[nr][nc] = qId;
+        regionCells = getRegionCells();
+        if (isRowDir) stolenRow = true; else stolenCol = true;
+      }
+
+      if (isLinearRegion(regionCells.get(qId)!)) { carved = true; break; }
+    }
+    if (!carved) break;
+  }
+}
+
 // MARK: Public API
 export function generateLevel(size: BoardSize, difficulty: Difficulty, seed?: number): LevelData {
   const rand = makePRNG(seed ?? (Date.now() ^ Math.floor(Math.random() * 0xffffffff)));
@@ -231,6 +358,7 @@ export function generateLevel(size: BoardSize, difficulty: Difficulty, seed?: nu
 
   const regions = buildRegions(size, queens, difficulty, rand);
   fixSingleCellRegions(regions, size, queens, minSingleCellRegions[difficulty], maxSingleCellRegions[difficulty]);
+  fixLinearRegions(regions, size, queens, minLinearRegions[difficulty], maxLinearRegions[difficulty]);
 
   return { id: 0, name: 'Generated', size, regions };
 }
