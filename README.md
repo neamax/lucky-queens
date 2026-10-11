@@ -2,7 +2,8 @@
 ### Open-source Classic Queens Game
 
 A browser-based logic puzzle where you place exactly one queen in every row, column, and colour region — with no two queens touching, not even diagonally. Built with React 19, TypeScript, and Tailwind CSS v4.
-#### [Play Online (Live Version)](https://queens.luckygene.site/)
+> ### ➡️ [**Play Live Deployment**](https://queens.luckygene.site/)
+
 
 ## Gameplay
 
@@ -86,9 +87,10 @@ src/
 
 Open-source — see repository for licence details.
 
-```
-Developed by
-Neama Kazemi
-at LuckyGene Indie Studio
-```
-#### Email: [neama@luckygene.site](mailto:neama@luckygene.site)
+> ---
+> *Developed by*
+> **Neama Kazemi**
+> at [LuckyGene Indie Studio](https://neama.luckygene.site/)
+> Email: [neama@luckygene.site](mailto:neama@luckygene.site)
+> ___
+
